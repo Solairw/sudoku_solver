@@ -1,11 +1,20 @@
+from collections import Counter
+
+
 def get_column(array, col):
+    """Transforms column to line"""
     column = []
     for row in array:
         column.append(row[col])
     return column
 
 
-def check_square(array, row_num, col_num):
+def check_duplicates(numbers):
+    return Counter(numbers).values()
+
+
+def get_square(array, row_num, col_num):
+    """Returns numbers in corresponding square"""
     nums = []
     k = row_num // 3
     l = col_num // 3
@@ -17,10 +26,13 @@ def check_square(array, row_num, col_num):
 
 
 def check_possible(nums, possible_nums):
+    """Gets possible nums in line/column/square and existing ones.
+    Return numbers what are possible to be addded"""
     return [x for x in possible_nums if x not in nums]
 
 
 def count_elements(array):
+    """Return number of non-zero elements in array"""
     return sum(x > 0 for row in array for x in row)
 
 
@@ -31,7 +43,7 @@ def sudoku(puzzle):
         for row_num, row in enumerate(puzzle):
             for col_num, cell in enumerate(row):
                 if cell == 0:
-                    temp = check_possible(check_square(puzzle, row_num, col_num), possible_nums)
+                    temp = check_possible(get_square(puzzle, row_num, col_num), possible_nums)
                     temp = check_possible(get_column(puzzle, col_num), temp)
                     temp = check_possible(row, temp)
                     if len(temp) == 1:
@@ -40,18 +52,14 @@ def sudoku(puzzle):
     return puzzle
 
 
-puzzle = [[5,3,0,0,7,0,0,0,0],
-          [6,0,0,1,9,5,0,0,0],
-          [0,9,8,0,0,0,0,6,0],
-          [8,0,0,0,6,0,0,0,3],
-          [4,0,0,8,0,3,0,0,1],
-          [7,0,0,0,2,0,0,0,6],
-          [0,6,0,0,0,0,2,8,0],
-          [0,0,0,4,1,9,0,0,5],
-          [0,0,0,0,8,0,0,7,9]]
-
-# print(get_column(puzzle, 0))
-
-# print(get_nums([0,1,0,2,0,3]))
-
-sudoku(puzzle)
+def done_or_not(board):
+    """Return True if the puzzle is solved correctly.
+    Return False if there is a mistake"""
+    for row_num, row in enumerate(board):
+        for col_num, cell in enumerate(row):
+            temp1 = Counter(row).values()
+            temp2 = Counter(get_column(board, col_num)).values()
+            temp3 = Counter(get_square(board, row_num, col_num)).values()
+            if len(temp1) < 9 or len(temp2) < 9 or len(temp3) < 9:
+                return False
+    return True
