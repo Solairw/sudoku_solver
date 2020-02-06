@@ -87,8 +87,11 @@ class SudokuBoard:
             for r in range(start_row, end_row):
                 for c in range(start_col, end_col):
                     self.cells[r, c].possible_vals = [val for val in self.cells[r, c].possible_vals if val not in square]
+                    # if len(self.cells[r, c].possible_vals) == 1 and not self.cells[r, c].solved:
+                    #     self.cells[r, c].val = self.cells[r, c].possible_vals[0]
+                    #     self.cells[r, c].solved = True
                     if not self.cells[r, c].possible_vals and not self.cells[r, c].solved:
-                        return False  # no further solution is possible
+                        return False
         return True  # solution is still possible
 
     def put_next_val(self):
@@ -100,8 +103,9 @@ class SudokuBoard:
             return False
 
     def come_back(self):
-        last_turn = self.turns.pop()
-        self.cursor = last_turn.copy()
+        # last_turn = self.turns.pop()
+        # self.cursor = last_turn.copy()
+        self.cursor = self.turns.pop()
 
     def move_cursor(self):
 
@@ -134,27 +138,27 @@ class SudokuBoard:
         solved_board = np.zeros((9, 9))
         for row in self.cells:
             for cell in row:
-                solved_board[cell.n_row, cell.n_col] = cell.val
+                solved_board[cell.n_row, cell.n_col] = int(cell.val)
         self.solved_board = solved_board
-        return f'{self.solved_board}'
+        return self.solved_board.tolist()
 
 
 def solve(board):
     sudoku_board = SudokuBoard(board)
-    sudoku_board.update_possible_vals()
     while not sudoku_board.is_solved():
         row, col = sudoku_board.cursor[0], sudoku_board.cursor[1]
-        if sudoku_board.cells[row, col].solved:
-            sudoku_board.move_cursor()
-        else:
-            if sudoku_board.put_next_val():
-                sudoku_board.move_cursor()
-                if not sudoku_board.update_possible_vals():
-                    sudoku_board.come_back()
-                    sudoku_board.reinitialize()
-            else:
+        if not sudoku_board.update_possible_vals():
+            if sudoku_board.turns:
                 sudoku_board.come_back()
+                sudoku_board.put_next_val()
                 sudoku_board.reinitialize()
+            else:
+                return 'The board has no solution'
+        else:
+            if not sudoku_board.cells[row, col].solved:
+                sudoku_board.put_next_val()
+        sudoku_board.move_cursor()
+
     return sudoku_board.__str__()
 
 
